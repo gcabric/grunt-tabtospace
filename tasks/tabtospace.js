@@ -28,22 +28,18 @@ module.exports = function(grunt) {
           }
           return space.join('');
       };
-      var analysisFileData = function (data) {
-          //
-          data = data.replace(/^(\s)+/gm, function (tab) {
-              var space = getSpace(options.spaceCnt);
-              var ret = tab.replace(/\t/g, space);
-              var len = ret.length;
-              // 这里保证下空格的个数是 spaceCnt 的整数倍
-              len = len - ret.length % options.spaceCnt;
-              ret = getSpace(len);
-              return ret;
-          });
-          data = data.replace(/\s+$/gm, function (space) {
-              return '';
-          });
-          return data;
-      };
+
+      var replaceTabs = function(file, data){
+          
+          if(data.indexOf('\t') == -1){
+            return data;
+          }
+
+          grunt.log.ok('replacing tabs with spaces: "%s" ', file);
+
+          var space = getSpace(options.spaceCnt);
+          return data.replace(/\t/g,space);
+      }     
 
       var fs = require('fs');
       var readFile = function (file) {
@@ -52,13 +48,11 @@ module.exports = function(grunt) {
           var data = fs.readFileSync(file, {
               encoding: options.encoding
           });
-          data = analysisFileData(data);
+          data = replaceTabs(file, data);
 
           fs.writeFileSync(file, data, {
               encoding: options.encoding
           });
-
-          grunt.log.ok('file: "%s" ----> success', file);
       };
       var tabToSpace = function (file) {
           if (!grunt.file.exists(file)) {
