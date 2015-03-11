@@ -29,14 +29,14 @@ module.exports = function(grunt) {
           return space.join('');
       };
 
-      var replaceTabs = function(file, data){
-          
+      var hasTabs = function(data){
           if(data.indexOf('\t') == -1){
-            return data;
+            return false;
           }
 
-          grunt.log.ok('replacing tabs with spaces: "%s" ', file);
-
+          return true;
+      }
+      var replaceTabs = function(data){                            
           var space = getSpace(options.spaceCnt);
           return data.replace(/\t/g,space);
       }     
@@ -48,11 +48,18 @@ module.exports = function(grunt) {
           var data = fs.readFileSync(file, {
               encoding: options.encoding
           });
-          data = replaceTabs(file, data);
 
-          fs.writeFileSync(file, data, {
+          if(hasTabs(data)){
+            data = replaceTabs(data);
+
+            fs.writeFileSync(file, data, {
               encoding: options.encoding
-          });
+            });
+
+            grunt.log.ok('replaced tabs with spaces: "%s" ', file);
+          }
+
+          
       };
       var tabToSpace = function (file) {
           if (!grunt.file.exists(file)) {
